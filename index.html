@@ -50,7 +50,7 @@
 <body class="text-brand-dark min-h-screen flex flex-col antialiased selection:bg-brand-terracotta selection:text-white">
 
   <!-- ================= TOP HEADER ================= -->
-  <header class="sticky top-0 z-40 bg-brand-cream/90 backdrop-blur-md border-b border-brand-border px-4 py-3">
+  <header class="sticky top-0 z-40 bg-brand-cream/95 backdrop-blur-md border-b border-brand-border px-4 py-3">
     <div class="max-w-4xl mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2.5 cursor-pointer" onclick="handleLogoClick()">
         <span class="w-10 h-10 rounded-2xl bg-brand-terracotta text-white flex items-center justify-center font-extrabold text-sm tracking-tight shadow-sm">QB</span>
@@ -61,16 +61,28 @@
       </div>
 
       <div class="flex items-center gap-2">
+        <!-- Live In-App Order Tracking Trigger Button -->
+        <button id="nav-track-btn" onclick="openActiveOrderTracker()" class="hidden items-center gap-1.5 px-3 py-1 rounded-full bg-brand-sun/25 border border-brand-sun/50 text-[11px] font-bold text-amber-950 animate-pulse">
+          <i class="fa-solid fa-motorcycle text-brand-terracotta"></i>
+          <span>Track Order</span>
+        </button>
+
+        <!-- Live Open/Closed Status Indicator -->
         <div id="status-pill" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/70 border border-emerald-300 text-[11px] font-bold text-emerald-800">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span id="status-text">Open</span>
         </div>
+
+        <!-- Admin PIN Modal Trigger -->
         <button onclick="openAdminPrompt()" class="w-9 h-9 rounded-xl border border-brand-border bg-white hover:bg-stone-50 flex items-center justify-center text-brand-muted text-xs shadow-sm transition" title="Admin Lock">
           <i class="fa-solid fa-lock"></i>
         </button>
       </div>
     </div>
   </header>
+
+  <!-- STORE ANNOUNCEMENT BANNER -->
+  <div id="store-custom-announcement" class="hidden bg-brand-sun text-brand-dark text-center py-2 px-4 font-bold text-xs"></div>
 
   <!-- STORE CLOSED BANNER -->
   <div id="store-closed-banner" class="hidden bg-brand-terracotta text-white text-center py-2.5 px-4 font-bold text-xs tracking-wide">
@@ -216,23 +228,24 @@
     </div>
   </div>
 
-  <!-- ORDER TRACKING & REVIEWS MODAL -->
+  <!-- PERSISTENT IN-APP ORDER STATUS TRACKER -->
   <div id="tracker-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-5 shadow-2xl">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-4 shadow-2xl">
       <div class="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mx-auto text-xl">
         <i class="fa-solid fa-utensils"></i>
       </div>
       <div>
-        <h3 class="font-serif font-black text-xl text-brand-dark">Order Dispatched!</h3>
+        <h3 class="font-serif font-black text-xl text-brand-dark">Live Order Status</h3>
         <p class="text-xs text-brand-muted mt-0.5">Order #<span id="tracker-order-id">0000</span></p>
       </div>
 
       <div class="bg-brand-cream rounded-2xl p-4 border border-brand-border">
-        <p class="text-[10px] uppercase font-bold tracking-widest text-brand-muted">Estimated Arrival</p>
-        <div class="text-4xl font-serif font-black text-brand-terracotta my-1 font-mono" id="tracker-countdown">25:00</div>
-        <p class="text-xs text-brand-dark font-semibold" id="tracker-step-title">Order Sent to Kitchen</p>
+        <p class="text-[10px] uppercase font-bold tracking-widest text-brand-muted">Estimated Delivery</p>
+        <div class="text-3xl font-serif font-black text-brand-terracotta my-1 font-mono" id="tracker-countdown">25:00</div>
+        <p class="text-xs text-brand-dark font-semibold" id="tracker-step-title">Order Received at Kitchen</p>
       </div>
 
+      <!-- 4 Stages -->
       <div class="grid grid-cols-4 gap-1.5 text-center text-[10px] font-bold text-stone-400">
         <div id="step-1" class="py-2 rounded-lg bg-emerald-600 text-white">Sent</div>
         <div id="step-2" class="py-2 rounded-lg bg-stone-100">Prep</div>
@@ -240,7 +253,10 @@
         <div id="step-4" class="py-2 rounded-lg bg-stone-100">Arrived</div>
       </div>
 
-      <div class="border-t border-brand-border pt-3 text-left">
+      <div id="tracker-summary-items" class="text-left text-[11px] text-stone-600 bg-stone-50 p-2.5 rounded-xl border border-stone-200"></div>
+
+      <!-- Rating Box -->
+      <div class="border-t border-brand-border pt-2 text-left">
         <label class="block text-[11px] font-bold text-stone-700 mb-1">Rate Your Experience</label>
         <div class="flex items-center gap-1.5 mb-2 text-lg text-brand-sun" id="star-rating">
           <i class="fa-solid fa-star cursor-pointer" onclick="setRating(1)"></i>
@@ -254,7 +270,7 @@
       </div>
 
       <div class="pt-1 flex items-center justify-between text-xs">
-        <button onclick="closeTrackerModal()" class="text-brand-muted hover:underline font-bold">Close</button>
+        <button onclick="closeTrackerModal()" class="text-brand-muted hover:underline font-bold">Close Window</button>
         <a id="tracker-call-support" href="tel:" class="font-bold text-brand-green flex items-center gap-1">
           <i class="fa-solid fa-phone"></i> Call Kitchen
         </a>
@@ -283,7 +299,7 @@
       <div class="flex items-center justify-between border-b border-brand-border pb-4">
         <div>
           <h3 class="font-serif font-black text-xl text-brand-dark">Store Operations Console</h3>
-          <p class="text-xs text-brand-muted font-medium">Control inventory, pricing, fuel fees, and QR codes</p>
+          <p class="text-xs text-brand-muted font-medium">Control inventory, pricing, fuel fees, daily reset, and logs</p>
         </div>
         <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-white hover:bg-stone-100 flex items-center justify-center text-stone-600">
           <i class="fa-solid fa-xmark"></i>
@@ -301,30 +317,39 @@
         </button>
       </div>
 
-      <!-- STATS -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
-          <p class="text-[10px] font-bold text-brand-muted uppercase">Revenue</p>
-          <p class="text-lg font-black text-brand-dark mt-0.5">₹<span id="stat-revenue">0</span></p>
+      <!-- STATS WITH OPTIONAL DAILY RESET -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-extrabold uppercase text-brand-muted">Performance & Shift Stats</span>
+          <button onclick="resetDailyStats()" class="text-xs text-brand-terracotta font-extrabold hover:underline flex items-center gap-1">
+            <i class="fa-solid fa-rotate-right"></i> Reset Today's Shift
+          </button>
         </div>
-        <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
-          <p class="text-[10px] font-bold text-brand-muted uppercase">Orders</p>
-          <p class="text-lg font-black text-brand-dark mt-0.5" id="stat-orders">0</p>
-        </div>
-        <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
-          <p class="text-[10px] font-bold text-brand-muted uppercase">Top Dish</p>
-          <p class="text-xs font-black text-brand-dark mt-1 truncate" id="stat-top-item">—</p>
-        </div>
-        <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
-          <p class="text-[10px] font-bold text-brand-muted uppercase">Rating</p>
-          <p class="text-lg font-black text-brand-dark mt-0.5" id="stat-rating">5.0 ★</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
+            <p class="text-[10px] font-bold text-brand-muted uppercase">Today's Revenue</p>
+            <p class="text-lg font-black text-brand-dark mt-0.5">₹<span id="stat-revenue">0</span></p>
+          </div>
+          <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
+            <p class="text-[10px] font-bold text-brand-muted uppercase">Today's Orders</p>
+            <p class="text-lg font-black text-brand-dark mt-0.5" id="stat-orders">0</p>
+          </div>
+          <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
+            <p class="text-[10px] font-bold text-brand-muted uppercase">Top Dish</p>
+            <p class="text-xs font-black text-brand-dark mt-1 truncate" id="stat-top-item">—</p>
+          </div>
+          <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
+            <p class="text-[10px] font-bold text-brand-muted uppercase">Customer Rating</p>
+            <p class="text-lg font-black text-brand-dark mt-0.5" id="stat-rating">5.0 ★</p>
+          </div>
         </div>
       </div>
 
       <!-- TABS -->
       <div class="flex border-b border-brand-border text-xs font-bold text-brand-muted gap-4">
         <button onclick="switchAdminTab('menu')" id="tab-btn-menu" class="pb-2 border-b-2 border-brand-terracotta text-brand-terracotta">Dishes & Prices</button>
-        <button onclick="switchAdminTab('delivery')" id="tab-btn-delivery" class="pb-2">Per-KM Rate & Fees</button>
+        <button onclick="switchAdminTab('orders')" id="tab-btn-orders" class="pb-2">Recent Orders Log</button>
+        <button onclick="switchAdminTab('delivery')" id="tab-btn-delivery" class="pb-2">Store & Rates</button>
         <button onclick="switchAdminTab('qr')" id="tab-btn-qr" class="pb-2">Counter QR Flyer</button>
       </div>
 
@@ -339,17 +364,34 @@
         <div class="space-y-2 max-h-72 overflow-y-auto pr-1" id="admin-menu-list"></div>
       </div>
 
-      <!-- TAB 2: DELIVERY & STORE SETTINGS -->
+      <!-- TAB 2: RECENT ORDERS LOG -->
+      <div id="admin-tab-orders" class="hidden space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-brand-dark">Recent Customer Dispatches</span>
+          <button onclick="clearOrderHistory()" class="text-xs text-red-600 font-bold hover:underline">Clear Log</button>
+        </div>
+        <div id="admin-orders-log-list" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
+      </div>
+
+      <!-- TAB 3: DELIVERY & STORE SETTINGS -->
       <div id="admin-tab-delivery" class="hidden space-y-4 text-xs font-bold text-stone-700">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block mb-1">Per-Kilometer Delivery Rate (X in ₹) *</label>
+            <label class="block mb-1">Per-Kilometer Delivery Rate (₹/km) *</label>
             <input type="number" id="setting-per-km" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
-            <p class="text-[10px] text-brand-muted font-normal mt-1">Adjust dynamically as fuel costs fluctuate.</p>
+            <p class="text-[10px] text-brand-muted font-normal mt-1">Adjust dynamically with fuel costs.</p>
           </div>
           <div>
             <label class="block mb-1">Base Starting Fee (₹) *</label>
             <input type="number" id="setting-base-fee" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
+          </div>
+          <div>
+            <label class="block mb-1">Base Prep Time (Minutes)</label>
+            <input type="number" id="setting-prep-time" placeholder="20" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
+          </div>
+          <div>
+            <label class="block mb-1">Owner WhatsApp Phone Number (with Country Code) *</label>
+            <input type="text" id="setting-phone" placeholder="e.g. 919876543210" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
           </div>
           <div>
             <label class="block mb-1">Kitchen Latitude</label>
@@ -360,14 +402,14 @@
             <input type="text" id="setting-lng" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
           </div>
           <div class="sm:col-span-2">
-            <label class="block mb-1">Owner WhatsApp Phone Number (with Country Code) *</label>
-            <input type="text" id="setting-phone" placeholder="e.g. 919876543210" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
+            <label class="block mb-1">Store Announcement Banner (Optional)</label>
+            <input type="text" id="setting-announcement" placeholder="e.g. Free soft drink with every order today!" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
           </div>
         </div>
         <button onclick="saveStoreSettings()" class="bg-brand-terracotta text-white px-4 py-2.5 rounded-xl font-bold transition">Save Settings</button>
       </div>
 
-      <!-- TAB 3: QR POSTER -->
+      <!-- TAB 4: QR POSTER -->
       <div id="admin-tab-qr" class="hidden text-center space-y-4">
         <p class="text-xs text-brand-muted">This QR works universally with Google Lens, default camera apps, and UPI scanners.</p>
         <div id="qr-poster-preview" class="border-2 border-brand-dark p-6 rounded-3xl max-w-xs mx-auto bg-white shadow-sm space-y-2">
@@ -435,9 +477,12 @@
       phone: "919876543210",
       baseFee: 20,
       perKmRate: 10,
+      basePrepMinutes: 20,
+      announcement: "",
       lat: 17.5540,
       lng: 80.6178,
-      stats: { revenue: 0, orders: 0, topItem: "The Alley Smash", ratingTotal: 25, ratingCount: 5 }
+      stats: { revenue: 0, orders: 0, topItem: "The Alley Smash", ratingTotal: 25, ratingCount: 5 },
+      recentOrders: []
     };
 
     const DEFAULT_MENU = [
@@ -494,14 +539,17 @@
     ];
 
     let store = JSON.parse(localStorage.getItem('qb_store')) || DEFAULT_STORE;
+    if (!store.recentOrders) store.recentOrders = [];
+    if (!store.basePrepMinutes) store.basePrepMinutes = 20;
+
     let menu = JSON.parse(localStorage.getItem('qb_menu')) || DEFAULT_MENU;
     let cart = {};
     let activeCategory = 'Everything';
     let searchQuery = '';
-    let customerCoords = null; // STRICT: Set only when customer taps GPS
+    let customerCoords = null; 
     let calculatedDistance = 0;
     let logoClicks = 0;
-    let countdownInterval = null;
+    let trackerTimer = null;
 
     function saveState() {
       localStorage.setItem('qb_store', JSON.stringify(store));
@@ -515,16 +563,26 @@
       updateStoreStatusUI();
       updateCartSummary();
       generateStoreQR();
+      checkCustomerActiveOrder();
     }
 
     function updateStoreStatusUI() {
       const statusPill = document.getElementById('status-pill');
       const statusText = document.getElementById('status-text');
       const banner = document.getElementById('store-closed-banner');
+      const annBanner = document.getElementById('store-custom-announcement');
       const toggleBtn = document.getElementById('toggle-store-status-btn');
       const heroRate = document.getElementById('hero-rate-display');
 
       if (heroRate) heroRate.innerText = store.perKmRate;
+
+      // Custom Announcement
+      if (store.announcement && store.announcement.trim()) {
+        annBanner.innerText = store.announcement;
+        annBanner.classList.remove('hidden');
+      } else {
+        annBanner.classList.add('hidden');
+      }
 
       if (store.isOpen) {
         statusPill.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/70 border border-emerald-300 text-[11px] font-bold text-emerald-800";
@@ -549,6 +607,25 @@
       store.isOpen = !store.isOpen;
       saveState();
       renderMenu();
+    }
+
+    // --- DAILY STATS RESET FOR ADMIN ---
+    function resetDailyStats() {
+      if (confirm("Reset today's shift orders and revenue counters to 0? (Menu and pricing will not be touched)")) {
+        store.stats.revenue = 0;
+        store.stats.orders = 0;
+        saveState();
+        renderAdminStats();
+        alert("Daily shift counters reset successfully!");
+      }
+    }
+
+    function clearOrderHistory() {
+      if (confirm("Clear local order log?")) {
+        store.recentOrders = [];
+        saveState();
+        renderAdminOrdersLog();
+      }
     }
 
     function renderCategories() {
@@ -761,7 +838,6 @@
       if (!phone || phone.length < 10) { alert("Please provide a valid 10-digit phone number."); return; }
       if (!address) { alert("Please provide your delivery address."); return; }
 
-      // MANDATORY GPS CHECK
       if (!customerCoords) {
         alert("📍 Live GPS Location is Mandatory!\nPlease tap 'Tap GPS' so our rider gets your exact pinned map location.");
         detectCustomerLocation();
@@ -770,12 +846,14 @@
 
       const orderId = Math.floor(1000 + Math.random() * 9000);
       let itemsListText = "";
+      let itemsArray = [];
       let subtotal = 0;
 
       Object.keys(cart).forEach(id => {
         const dish = menu.find(m => m.id === id);
         if (dish) {
           itemsListText += `• ${cart[id]}x ${dish.name} - ₹${dish.price * cart[id]}\n`;
+          itemsArray.push(`${cart[id]}x ${dish.name}`);
           subtotal += dish.price * cart[id];
         }
       });
@@ -783,6 +861,36 @@
       const deliveryFee = Math.round(store.baseFee + (calculatedDistance * store.perKmRate));
       const grandTotal = subtotal + deliveryFee;
       const mapLink = `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}`;
+
+      // Save to customer's own device for persistent in-app tracking
+      const totalSeconds = Math.round(((store.basePrepMinutes || 20) + (calculatedDistance * 3)) * 60);
+      const activeOrderData = {
+        orderId: orderId,
+        customerName: name,
+        itemsText: itemsArray.join(', '),
+        total: grandTotal,
+        placedAt: Date.now(),
+        durationSeconds: totalSeconds,
+        phone: phone,
+        address: address,
+        mapLink: mapLink
+      };
+      localStorage.setItem('qb_active_order', JSON.stringify(activeOrderData));
+
+      // Save to Admin Log & Stats
+      store.stats.orders += 1;
+      store.stats.revenue += grandTotal;
+      store.recentOrders.unshift({
+        id: orderId,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        name: name,
+        phone: phone,
+        items: itemsArray.join(', '),
+        total: grandTotal,
+        mapLink: mapLink
+      });
+      if (store.recentOrders.length > 20) store.recentOrders.pop();
+      saveState();
 
       const receipt = `🍔 *NEW QUICKBITE ORDER #${orderId}*\n` +
         `--------------------------------\n` +
@@ -801,10 +909,6 @@
         `--------------------------------\n` +
         `_Please reply to confirm and start kitchen prep._`;
 
-      store.stats.orders += 1;
-      store.stats.revenue += grandTotal;
-      saveState();
-
       cart = {};
       renderMenu();
       updateCartSummary();
@@ -813,45 +917,72 @@
       const waUrl = `https://wa.me/${store.phone}?text=${encodeURIComponent(receipt)}`;
       window.open(waUrl, '_blank');
 
-      startOrderTracker(orderId, calculatedDistance);
+      checkCustomerActiveOrder();
+      openActiveOrderTracker();
     }
 
-    // --- TRACKER & REVIEWS ---
-    function startOrderTracker(orderId, distanceKm) {
-      document.getElementById('tracker-order-id').innerText = orderId;
+    // --- IN-APP PERSISTENT ORDER TRACKER ---
+    function checkCustomerActiveOrder() {
+      const activeOrder = JSON.parse(localStorage.getItem('qb_active_order'));
+      const trackBtn = document.getElementById('nav-track-btn');
+      if (activeOrder) {
+        trackBtn.classList.remove('hidden');
+        trackBtn.classList.add('flex');
+      } else {
+        trackBtn.classList.add('hidden');
+        trackBtn.classList.remove('flex');
+      }
+    }
+
+    function openActiveOrderTracker() {
+      const activeOrder = JSON.parse(localStorage.getItem('qb_active_order'));
+      if (!activeOrder) return;
+
+      document.getElementById('tracker-order-id').innerText = activeOrder.orderId;
       document.getElementById('tracker-call-support').href = `tel:${store.phone}`;
+      document.getElementById('tracker-summary-items').innerHTML = `
+        <p class="font-bold text-stone-800">${activeOrder.itemsText}</p>
+        <p class="mt-0.5">Total Payable (COD): <span class="font-bold text-brand-terracotta">₹${activeOrder.total}</span></p>
+      `;
+
       const modal = document.getElementById('tracker-modal');
       modal.classList.remove('hidden');
 
-      let totalSeconds = Math.round((15 + (distanceKm * 3)) * 60);
-      if (countdownInterval) clearInterval(countdownInterval);
+      if (trackerTimer) clearInterval(trackerTimer);
 
-      countdownInterval = setInterval(() => {
-        totalSeconds--;
-        if (totalSeconds <= 0) {
-          clearInterval(countdownInterval);
+      function updateCountdown() {
+        const elapsedSecs = Math.floor((Date.now() - activeOrder.placedAt) / 1000);
+        const remainingSecs = activeOrder.durationSeconds - elapsedSecs;
+
+        if (remainingSecs <= 0) {
+          clearInterval(trackerTimer);
           document.getElementById('tracker-countdown').innerText = "00:00";
-          document.getElementById('tracker-step-title').innerText = "Rider Has Arrived!";
+          document.getElementById('tracker-step-title').innerText = "Rider Has Arrived! Enjoy your meal.";
           updateTrackingMilestone(4);
           return;
         }
 
-        const mins = Math.floor(totalSeconds / 60);
-        const secs = totalSeconds % 60;
+        const mins = Math.floor(remainingSecs / 60);
+        const secs = remainingSecs % 60;
         document.getElementById('tracker-countdown').innerText = 
           `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 
-        if (totalSeconds > 1000) {
-          document.getElementById('tracker-step-title').innerText = "Order Sent to Kitchen";
+        // Dynamic Stage progression based on elapsed percentage
+        const progressPct = (elapsedSecs / activeOrder.durationSeconds) * 100;
+        if (progressPct < 25) {
+          document.getElementById('tracker-step-title').innerText = "Order Confirmed by Kitchen";
           updateTrackingMilestone(1);
-        } else if (totalSeconds > 500) {
-          document.getElementById('tracker-step-title').innerText = "Packaging Fresh Meal";
+        } else if (progressPct < 65) {
+          document.getElementById('tracker-step-title').innerText = "Chef is Cooking Fresh";
           updateTrackingMilestone(2);
         } else {
-          document.getElementById('tracker-step-title').innerText = "Rider On The Way";
+          document.getElementById('tracker-step-title').innerText = "Rider is Out on the Road";
           updateTrackingMilestone(3);
         }
-      }, 1000);
+      }
+
+      updateCountdown();
+      trackerTimer = setInterval(updateCountdown, 1000);
     }
 
     function updateTrackingMilestone(step) {
@@ -924,6 +1055,7 @@
       document.getElementById('admin-modal').classList.remove('hidden');
       renderAdminStats();
       renderAdminMenuList();
+      renderAdminOrdersLog();
       loadAdminSettingsInputs();
       generateStoreQR();
     }
@@ -940,12 +1072,37 @@
       document.getElementById('stat-rating').innerText = `${avg} ★`;
     }
 
+    function renderAdminOrdersLog() {
+      const container = document.getElementById('admin-orders-log-list');
+      if (!store.recentOrders || store.recentOrders.length === 0) {
+        container.innerHTML = `<p class="text-xs text-brand-muted text-center py-6">No recent dispatches logged yet.</p>`;
+        return;
+      }
+      container.innerHTML = store.recentOrders.map(ord => `
+        <div class="bg-white border border-brand-border p-3 rounded-2xl text-xs space-y-1">
+          <div class="flex justify-between font-bold text-brand-dark">
+            <span>Order #${ord.id} (${ord.name})</span>
+            <span class="text-brand-terracotta">₹${ord.total}</span>
+          </div>
+          <p class="text-[11px] text-stone-500">${ord.items}</p>
+          <div class="flex justify-between items-center pt-1 text-[10px] text-brand-muted">
+            <span>Time: ${ord.time} · Ph: ${ord.phone}</span>
+            <a href="${ord.mapLink}" target="_blank" class="text-blue-600 font-bold hover:underline flex items-center gap-1">
+              <i class="fa-solid fa-location-dot"></i> Rider Pin
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
     function switchAdminTab(tab) {
       document.getElementById('admin-tab-menu').classList.toggle('hidden', tab !== 'menu');
+      document.getElementById('admin-tab-orders').classList.toggle('hidden', tab !== 'orders');
       document.getElementById('admin-tab-delivery').classList.toggle('hidden', tab !== 'delivery');
       document.getElementById('admin-tab-qr').classList.toggle('hidden', tab !== 'qr');
 
       document.getElementById('tab-btn-menu').className = tab === 'menu' ? "pb-2 border-b-2 border-brand-terracotta text-brand-terracotta font-bold" : "pb-2 font-bold text-brand-muted";
+      document.getElementById('tab-btn-orders').className = tab === 'orders' ? "pb-2 border-b-2 border-brand-terracotta text-brand-terracotta font-bold" : "pb-2 font-bold text-brand-muted";
       document.getElementById('tab-btn-delivery').className = tab === 'delivery' ? "pb-2 border-b-2 border-brand-terracotta text-brand-terracotta font-bold" : "pb-2 font-bold text-brand-muted";
       document.getElementById('tab-btn-qr').className = tab === 'qr' ? "pb-2 border-b-2 border-brand-terracotta text-brand-terracotta font-bold" : "pb-2 font-bold text-brand-muted";
     }
@@ -1057,6 +1214,8 @@
     function loadAdminSettingsInputs() {
       document.getElementById('setting-per-km').value = store.perKmRate;
       document.getElementById('setting-base-fee').value = store.baseFee;
+      document.getElementById('setting-prep-time').value = store.basePrepMinutes || 20;
+      document.getElementById('setting-announcement').value = store.announcement || '';
       document.getElementById('setting-lat').value = store.lat;
       document.getElementById('setting-lng').value = store.lng;
       document.getElementById('setting-phone').value = store.phone;
@@ -1065,13 +1224,15 @@
     function saveStoreSettings() {
       store.perKmRate = parseFloat(document.getElementById('setting-per-km').value) || 10;
       store.baseFee = parseFloat(document.getElementById('setting-base-fee').value) || 20;
+      store.basePrepMinutes = parseInt(document.getElementById('setting-prep-time').value) || 20;
+      store.announcement = document.getElementById('setting-announcement').value.trim();
       store.lat = parseFloat(document.getElementById('setting-lat').value) || 17.5540;
       store.lng = parseFloat(document.getElementById('setting-lng').value) || 80.6178;
       store.phone = document.getElementById('setting-phone').value.trim();
 
       saveState();
       updateCartSummary();
-      alert("Settings saved successfully!");
+      alert("Settings and announcement saved successfully!");
     }
 
     function generateStoreQR() {
@@ -1092,4 +1253,5 @@
   </script>
 </body>
 </html>
+
 
