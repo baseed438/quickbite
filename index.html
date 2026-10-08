@@ -1,0 +1,1105 @@
+Here is the complete, final index.html code with all your requirements built in:
+ * Matching Visual Theme: Warm cream backdrop, forest-green hero card (Good food. No guesswork.), pill category chips, and terracotta buttons.
+ * Strict Mandatory GPS: Blocks checkout and delivery calculation until the customer taps the GPS button.
+ * Store Open / Closed Switch: Master toggle in Admin that locks ordering when closed.
+ * Cash on Delivery (COD) Only: Clear labels at checkout and on WhatsApp receipts.
+ * Editable Per-KM Fuel Charge (X): Update your delivery rate anytime in the admin settings.
+ * Full In-App Admin (PIN: 1234): Edit dish names, prices, descriptions, images, and in-stock toggles.
+ * Universal QR Code Generator: Creates a scan code for Google Lens, phone cameras, and UPI apps.
+ * Countdown Order Tracker & 5-Star Rating System.
+Copy the entire code block below and paste it directly into your GitHub index.html file:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuickBite | Neighborhood Counter</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Fraunces & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <!-- QR Code Generator Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Fraunces', 'serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              cream: '#F9F6F0',
+              green: '#1C3E2D',
+              greenLight: '#2A5A43',
+              terracotta: '#DE5135',
+              terracottaDark: '#C43F24',
+              sun: '#F5C84C',
+              dark: '#1D1D1B',
+              muted: '#7B776F',
+              border: '#E8E3D9'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #F9F6F0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    h1, h2, h3, .font-serif { font-family: 'Fraunces', serif; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="text-brand-dark min-h-screen flex flex-col antialiased selection:bg-brand-terracotta selection:text-white">
+
+  <!-- ================= TOP HEADER ================= -->
+  <header class="sticky top-0 z-40 bg-brand-cream/90 backdrop-blur-md border-b border-brand-border px-4 py-3">
+    <div class="max-w-4xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2.5 cursor-pointer" onclick="handleLogoClick()">
+        <span class="w-10 h-10 rounded-2xl bg-brand-terracotta text-white flex items-center justify-center font-extrabold text-sm tracking-tight shadow-sm">QB</span>
+        <div>
+          <h1 class="text-base font-extrabold text-brand-dark leading-tight">QuickBite</h1>
+          <p class="text-[10px] tracking-widest uppercase font-bold text-brand-muted">Neighborhood Counter</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <div id="status-pill" class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/70 border border-emerald-300 text-[11px] font-bold text-emerald-800">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span id="status-text">Open</span>
+        </div>
+        <button onclick="openAdminPrompt()" class="w-9 h-9 rounded-xl border border-brand-border bg-white hover:bg-stone-50 flex items-center justify-center text-brand-muted text-xs shadow-sm transition" title="Admin Lock">
+          <i class="fa-solid fa-lock"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- STORE CLOSED BANNER -->
+  <div id="store-closed-banner" class="hidden bg-brand-terracotta text-white text-center py-2.5 px-4 font-bold text-xs tracking-wide">
+    <i class="fa-solid fa-clock mr-1.5"></i> The kitchen is currently resting. Menu browsing is open, but orders are paused.
+  </div>
+
+  <!-- HERO BANNER -->
+  <section class="max-w-4xl mx-auto px-4 pt-5 pb-3 w-full">
+    <div class="relative bg-brand-green text-white rounded-3xl p-6 sm:p-9 overflow-hidden shadow-sm">
+      <div class="relative z-10 max-w-sm sm:max-w-md space-y-2.5">
+        <p class="text-[10px] uppercase tracking-widest font-extrabold text-brand-sun opacity-90">Your Corner · Your Cravings</p>
+        <h2 class="text-3xl sm:text-4xl font-serif font-black tracking-tight leading-none">Good food.<br>No guesswork.</h2>
+        <p class="text-emerald-100/90 text-xs sm:text-sm font-medium leading-relaxed pt-1">
+          Made fresh around the corner. Pick your favorites, see transparent delivery fees upfront, and order straight to WhatsApp.
+        </p>
+      </div>
+
+      <div class="relative z-10 mt-6 flex flex-wrap gap-2 text-[11px] font-bold">
+        <span class="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
+          Delivery fee shown upfront
+        </span>
+        <span class="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/15">
+          Local delivery · ₹<span id="hero-rate-display">10</span>/km
+        </span>
+        <span class="bg-brand-sun/20 text-brand-sun px-3 py-1.5 rounded-full border border-brand-sun/30">
+          Cash on Delivery (COD) Only
+        </span>
+      </div>
+
+      <div class="absolute -right-8 -top-8 w-44 h-44 rounded-full bg-brand-sun opacity-90 pointer-events-none"></div>
+      <div class="absolute -right-24 -bottom-24 w-64 h-64 rounded-full border-2 border-white/10 pointer-events-none"></div>
+    </div>
+  </section>
+
+  <!-- MENU SECTION -->
+  <main class="max-w-4xl mx-auto px-4 py-4 flex-1 w-full space-y-5">
+    <div class="space-y-1">
+      <h3 class="text-2xl font-serif font-black text-brand-dark tracking-tight">Pick your happy.</h3>
+      <p class="text-xs text-brand-muted font-medium">Counter favorites, cooked when you order.</p>
+    </div>
+
+    <!-- Search Input -->
+    <div class="relative">
+      <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-xs text-brand-muted"></i>
+      <input type="text" id="search-input" oninput="handleSearch()" placeholder="Find your favorite..." class="w-full bg-white border border-brand-border rounded-2xl pl-9 pr-4 py-2.5 text-xs font-medium placeholder-brand-muted/70 focus:outline-none focus:ring-2 focus:ring-brand-terracotta/20 transition" />
+    </div>
+
+    <!-- Category Pills -->
+    <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1" id="category-pills"></div>
+
+    <!-- Dish Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-20" id="menu-grid"></div>
+  </main>
+
+  <!-- STICKY BOTTOM BAG BAR -->
+  <div id="sticky-bottom-bar" class="fixed bottom-4 inset-x-4 max-w-md mx-auto z-30 transition-transform translate-y-32">
+    <button onclick="toggleCartDrawer(true)" class="w-full bg-brand-terracotta hover:bg-brand-terracottaDark text-white p-3.5 rounded-2xl font-bold flex items-center justify-between shadow-xl shadow-brand-terracotta/20 transition">
+      <div class="flex items-center gap-2 text-xs">
+        <span class="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center font-extrabold text-[11px]" id="bottom-bar-count">0</span>
+        <span>View your bag</span>
+      </div>
+      <span class="text-sm font-extrabold">₹<span id="bottom-bar-total">0</span> →</span>
+    </button>
+  </div>
+
+  <!-- CART & CHECKOUT DRAWER -->
+  <div id="cart-drawer-overlay" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 opacity-0 pointer-events-none transition-opacity duration-300" onclick="toggleCartDrawer(false)"></div>
+  <div id="cart-drawer" class="fixed inset-y-0 right-0 max-w-md w-full bg-brand-cream z-50 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-300">
+    <div class="p-4 border-b border-brand-border flex items-center justify-between bg-white">
+      <div>
+        <h3 class="font-serif font-black text-lg text-brand-dark">Your bag</h3>
+        <p class="text-[11px] text-brand-muted font-semibold">Fresh meals ready for dispatch</p>
+      </div>
+      <button onclick="toggleCartDrawer(false)" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 flex items-center justify-center text-xs">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <div id="cart-items-list" class="space-y-2"></div>
+
+      <!-- Checkout Form -->
+      <div id="checkout-form-container" class="mt-4 pt-4 border-t border-brand-border space-y-3">
+        <p class="text-xs font-extrabold uppercase tracking-wider text-brand-dark">Delivery Address & Details</p>
+
+        <div>
+          <label class="block text-[11px] font-bold text-stone-700 mb-1">Your Name *</label>
+          <input type="text" id="cust-name" placeholder="Full name" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-terracotta outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-stone-700 mb-1">Mobile Phone (10 digits) *</label>
+          <input type="tel" id="cust-phone" maxlength="10" placeholder="e.g. 9876543210" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-terracotta outline-none" />
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-[11px] font-bold text-stone-700">Street Address & Landmark *</label>
+            <button type="button" onclick="detectCustomerLocation()" class="text-[11px] font-extrabold text-brand-terracotta hover:underline flex items-center gap-1">
+              <i class="fa-solid fa-location-crosshairs"></i> Tap GPS *
+            </button>
+          </div>
+          <textarea id="cust-address" rows="2" placeholder="House/Flat number, road, nearby landmark *" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs focus:ring-1 focus:ring-brand-terracotta outline-none"></textarea>
+
+          <!-- MANDATORY GPS STATUS BOX -->
+          <div id="gps-status-box" class="mt-2 p-2.5 rounded-xl bg-red-100/70 border border-red-200 text-[11px] font-bold text-red-800 flex items-center gap-2">
+            <i class="fa-solid fa-circle-exclamation text-red-500"></i>
+            <span id="gps-status-text">Live GPS is strictly required before checkout.</span>
+          </div>
+        </div>
+
+        <!-- Bill Receipt Breakdown -->
+        <div class="bg-white rounded-2xl p-4 border border-brand-border space-y-2 text-xs">
+          <div class="flex justify-between text-brand-muted font-medium">
+            <span>Items Subtotal</span>
+            <span class="text-brand-dark font-bold">₹<span id="bill-subtotal">0</span></span>
+          </div>
+          <div class="flex justify-between text-brand-muted font-medium">
+            <span>Delivery Fee (<span id="bill-distance">0.0</span> km)</span>
+            <span class="text-brand-dark font-bold">₹<span id="bill-delivery">Tap GPS</span></span>
+          </div>
+          <div class="border-t border-brand-border pt-2 flex justify-between text-sm font-extrabold text-brand-dark">
+            <span>Total Payable</span>
+            <span class="text-brand-terracotta text-base">₹<span id="bill-total">0</span></span>
+          </div>
+        </div>
+
+        <div class="bg-brand-sun/15 border border-brand-sun/30 rounded-xl p-3 flex items-start gap-2.5 text-[11px] text-amber-950 font-medium">
+          <i class="fa-solid fa-hand-holding-dollar text-sm text-brand-terracotta mt-0.5"></i>
+          <div>
+            <span class="font-bold">Cash on Delivery (COD) Only:</span>
+            <p class="text-amber-900 mt-0.5">Pay the exact bill directly to the rider with cash or UPI upon delivery.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 border-t border-brand-border bg-white">
+      <button id="submit-order-btn" onclick="submitOrderViaWhatsApp()" class="w-full bg-brand-green hover:bg-brand-greenLight text-white py-3.5 rounded-2xl font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition">
+        <i class="fa-brands fa-whatsapp text-base"></i>
+        <span>Place Order via WhatsApp</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ORDER TRACKING & REVIEWS MODAL -->
+  <div id="tracker-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-5 shadow-2xl">
+      <div class="w-14 h-14 bg-emerald-100 text-emerald-800 rounded-full flex items-center justify-center mx-auto text-xl">
+        <i class="fa-solid fa-utensils"></i>
+      </div>
+      <div>
+        <h3 class="font-serif font-black text-xl text-brand-dark">Order Dispatched!</h3>
+        <p class="text-xs text-brand-muted mt-0.5">Order #<span id="tracker-order-id">0000</span></p>
+      </div>
+
+      <div class="bg-brand-cream rounded-2xl p-4 border border-brand-border">
+        <p class="text-[10px] uppercase font-bold tracking-widest text-brand-muted">Estimated Arrival</p>
+        <div class="text-4xl font-serif font-black text-brand-terracotta my-1 font-mono" id="tracker-countdown">25:00</div>
+        <p class="text-xs text-brand-dark font-semibold" id="tracker-step-title">Order Sent to Kitchen</p>
+      </div>
+
+      <div class="grid grid-cols-4 gap-1.5 text-center text-[10px] font-bold text-stone-400">
+        <div id="step-1" class="py-2 rounded-lg bg-emerald-600 text-white">Sent</div>
+        <div id="step-2" class="py-2 rounded-lg bg-stone-100">Prep</div>
+        <div id="step-3" class="py-2 rounded-lg bg-stone-100">Rider</div>
+        <div id="step-4" class="py-2 rounded-lg bg-stone-100">Arrived</div>
+      </div>
+
+      <div class="border-t border-brand-border pt-3 text-left">
+        <label class="block text-[11px] font-bold text-stone-700 mb-1">Rate Your Experience</label>
+        <div class="flex items-center gap-1.5 mb-2 text-lg text-brand-sun" id="star-rating">
+          <i class="fa-solid fa-star cursor-pointer" onclick="setRating(1)"></i>
+          <i class="fa-solid fa-star cursor-pointer" onclick="setRating(2)"></i>
+          <i class="fa-solid fa-star cursor-pointer" onclick="setRating(3)"></i>
+          <i class="fa-solid fa-star cursor-pointer" onclick="setRating(4)"></i>
+          <i class="fa-solid fa-star cursor-pointer" onclick="setRating(5)"></i>
+        </div>
+        <input type="text" id="review-text" placeholder="Optional comments..." class="w-full bg-brand-cream border border-brand-border rounded-xl px-3 py-1.5 text-xs mb-2 outline-none" />
+        <button onclick="submitReview()" class="w-full bg-brand-dark text-white text-xs font-bold py-2 rounded-xl">Submit Feedback</button>
+      </div>
+
+      <div class="pt-1 flex items-center justify-between text-xs">
+        <button onclick="closeTrackerModal()" class="text-brand-muted hover:underline font-bold">Close</button>
+        <a id="tracker-call-support" href="tel:" class="font-bold text-brand-green flex items-center gap-1">
+          <i class="fa-solid fa-phone"></i> Call Kitchen
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN PASSCODE MODAL -->
+  <div id="admin-pin-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-xs w-full p-5 text-center space-y-4 shadow-xl">
+      <div class="w-12 h-12 bg-stone-100 text-brand-dark rounded-full flex items-center justify-center mx-auto text-lg">
+        <i class="fa-solid fa-key"></i>
+      </div>
+      <h3 class="font-serif font-black text-brand-dark text-base">Enter Admin Passcode</h3>
+      <input type="password" id="admin-pin-input" maxlength="4" placeholder="Default: 1234" class="w-full text-center text-2xl tracking-widest font-mono border border-brand-border rounded-xl py-2 focus:ring-2 focus:ring-brand-terracotta outline-none" />
+      <div class="flex gap-2 text-xs font-bold">
+        <button onclick="closeAdminPinModal()" class="flex-1 bg-stone-100 text-stone-700 py-2 rounded-xl">Cancel</button>
+        <button onclick="verifyAdminPin()" class="flex-1 bg-brand-terracotta text-white py-2 rounded-xl">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN OPERATIONS CONSOLE -->
+  <div id="admin-modal" class="fixed inset-0 bg-black/75 z-50 p-2 sm:p-4 overflow-y-auto hidden">
+    <div class="bg-brand-cream rounded-3xl max-w-3xl w-full mx-auto my-4 p-5 sm:p-6 shadow-2xl space-y-6">
+      <div class="flex items-center justify-between border-b border-brand-border pb-4">
+        <div>
+          <h3 class="font-serif font-black text-xl text-brand-dark">Store Operations Console</h3>
+          <p class="text-xs text-brand-muted font-medium">Control inventory, pricing, fuel fees, and QR codes</p>
+        </div>
+        <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-white hover:bg-stone-100 flex items-center justify-center text-stone-600">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- MASTER STORE SWITCH -->
+      <div class="bg-white border border-brand-border p-4 rounded-2xl flex items-center justify-between">
+        <div>
+          <p class="font-bold text-sm text-brand-dark">Store Ordering Status</p>
+          <p class="text-xs text-brand-muted" id="store-status-subtext">Store is currently accepting orders.</p>
+        </div>
+        <button id="toggle-store-status-btn" onclick="toggleStoreStatus()" class="px-4 py-2 rounded-xl text-xs font-bold text-white bg-brand-green hover:bg-brand-greenLight transition">
+          Store Open
+        </button>
+      </div>
+
+      <!-- STATS -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
+          <p class="text-[10px] font-bold text-brand-muted uppercase">Revenue</p>
+          <p class="text-lg font-black text-brand-dark mt-0.5">₹<span id="stat-revenue">0</span></p>
+        </div>
+        <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
+          <p class="text-[10px] font-bold text-brand-muted uppercase">Orders</p>
+          <p class="text-lg font-black text-brand-dark mt-0.5" id="stat-orders">0</p>
+        </div>
+        <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
+          <p class="text-[10px] font-bold text-brand-muted uppercase">Top Dish</p>
+          <p class="text-xs font-black text-brand-dark mt-1 truncate" id="stat-top-item">—</p>
+        </div>
+        <div class="bg-white border border-brand-border p-3 rounded-2xl text-center">
+          <p class="text-[10px] font-bold text-brand-muted uppercase">Rating</p>
+          <p class="text-lg font-black text-brand-dark mt-0.5" id="stat-rating">5.0 ★</p>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="flex border-b border-brand-border text-xs font-bold text-brand-muted gap-4">
+        <button onclick="switchAdminTab('menu')" id="tab-btn-menu" class="pb-2 border-b-2 border-brand-terracotta text-brand-terracotta">Dishes & Prices</button>
+        <button onclick="switchAdminTab('delivery')" id="tab-btn-delivery" class="pb-2">Per-KM Rate & Fees</button>
+        <button onclick="switchAdminTab('qr')" id="tab-btn-qr" class="pb-2">Counter QR Flyer</button>
+      </div>
+
+      <!-- TAB 1: MENU -->
+      <div id="admin-tab-menu" class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-xs font-bold text-brand-dark">Active Menu (<span id="admin-item-count">0</span> items)</span>
+          <button onclick="openDishEditor()" class="bg-brand-dark text-white px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5">
+            <i class="fa-solid fa-plus text-[10px]"></i> Add Dish
+          </button>
+        </div>
+        <div class="space-y-2 max-h-72 overflow-y-auto pr-1" id="admin-menu-list"></div>
+      </div>
+
+      <!-- TAB 2: DELIVERY & STORE SETTINGS -->
+      <div id="admin-tab-delivery" class="hidden space-y-4 text-xs font-bold text-stone-700">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block mb-1">Per-Kilometer Delivery Rate (X in ₹) *</label>
+            <input type="number" id="setting-per-km" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
+            <p class="text-[10px] text-brand-muted font-normal mt-1">Adjust dynamically as fuel costs fluctuate.</p>
+          </div>
+          <div>
+            <label class="block mb-1">Base Starting Fee (₹) *</label>
+            <input type="number" id="setting-base-fee" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
+          </div>
+          <div>
+            <label class="block mb-1">Kitchen Latitude</label>
+            <input type="text" id="setting-lat" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
+          </div>
+          <div>
+            <label class="block mb-1">Kitchen Longitude</label>
+            <input type="text" id="setting-lng" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
+          </div>
+          <div class="sm:col-span-2">
+            <label class="block mb-1">Owner WhatsApp Phone Number (with Country Code) *</label>
+            <input type="text" id="setting-phone" placeholder="e.g. 919876543210" class="w-full bg-white border border-brand-border rounded-xl px-3 py-2 text-xs outline-none" />
+          </div>
+        </div>
+        <button onclick="saveStoreSettings()" class="bg-brand-terracotta text-white px-4 py-2.5 rounded-xl font-bold transition">Save Settings</button>
+      </div>
+
+      <!-- TAB 3: QR POSTER -->
+      <div id="admin-tab-qr" class="hidden text-center space-y-4">
+        <p class="text-xs text-brand-muted">This QR works universally with Google Lens, default camera apps, and UPI scanners.</p>
+        <div id="qr-poster-preview" class="border-2 border-brand-dark p-6 rounded-3xl max-w-xs mx-auto bg-white shadow-sm space-y-2">
+          <p class="font-serif font-black text-brand-dark text-xl">QuickBite</p>
+          <p class="text-[10px] text-brand-muted font-bold tracking-wider uppercase">Scan to Order Directly</p>
+          <div id="qrcode-canvas" class="flex justify-center my-3"></div>
+          <p class="text-[10px] text-brand-muted font-semibold">Cash on Delivery Available</p>
+        </div>
+        <button onclick="window.print()" class="bg-brand-dark text-white text-xs font-bold px-4 py-2 rounded-xl">
+          <i class="fa-solid fa-print mr-1"></i> Print / Save Flyer
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISH EDIT MODAL -->
+  <div id="dish-modal" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-5 space-y-3 shadow-2xl">
+      <h3 class="font-serif font-black text-brand-dark text-base" id="dish-modal-title">Edit Dish</h3>
+      <input type="hidden" id="dish-edit-id" />
+      <div>
+        <label class="block text-[11px] font-bold text-stone-700 mb-1">Dish Name *</label>
+        <input type="text" id="dish-name" class="w-full border border-brand-border rounded-lg px-3 py-1.5 text-xs outline-none" />
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block text-[11px] font-bold text-stone-700 mb-1">Price (₹) *</label>
+          <input type="number" id="dish-price" class="w-full border border-brand-border rounded-lg px-3 py-1.5 text-xs outline-none" />
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-stone-700 mb-1">Category *</label>
+          <select id="dish-category" class="w-full border border-brand-border rounded-lg px-3 py-1.5 text-xs outline-none">
+            <option value="Burgers">Burgers</option>
+            <option value="Pizzas">Pizzas</option>
+            <option value="Sides">Sides</option>
+            <option value="Drinks">Drinks</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold text-stone-700 mb-1">Description</label>
+        <input type="text" id="dish-desc" class="w-full border border-brand-border rounded-lg px-3 py-1.5 text-xs outline-none" />
+      </div>
+      <div>
+        <label class="block text-[11px] font-bold text-stone-700 mb-1">Image URL</label>
+        <input type="url" id="dish-img" class="w-full border border-brand-border rounded-lg px-3 py-1.5 text-xs outline-none" />
+      </div>
+      <div class="flex items-center gap-2 pt-1">
+        <input type="checkbox" id="dish-stock" class="rounded text-brand-terracotta w-4 h-4" />
+        <label for="dish-stock" class="text-xs font-bold text-stone-800">In Stock / Available</label>
+      </div>
+      <div class="flex gap-2 pt-2 text-xs font-bold">
+        <button onclick="closeDishModal()" class="flex-1 bg-stone-100 text-stone-700 py-2 rounded-lg">Cancel</button>
+        <button onclick="saveDishItem()" class="flex-1 bg-brand-terracotta text-white py-2 rounded-lg">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= APPLICATION JAVASCRIPT ================= -->
+  <script>
+    const DEFAULT_STORE = {
+      name: "QuickBite",
+      isOpen: true,
+      pin: "1234",
+      phone: "919876543210",
+      baseFee: 20,
+      perKmRate: 10,
+      lat: 17.5540,
+      lng: 80.6178,
+      stats: { revenue: 0, orders: 0, topItem: "The Alley Smash", ratingTotal: 25, ratingCount: 5 }
+    };
+
+    const DEFAULT_MENU = [
+      {
+        id: "1",
+        name: "The Alley Smash",
+        category: "Burgers",
+        badge: "COUNTER FAVORITE",
+        price: 149,
+        desc: "Double seared patties, melted cheddar, crisp lettuce, house relish.",
+        img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=500&q=80",
+        inStock: true
+      },
+      {
+        id: "2",
+        name: "Chili Crunch Chicken",
+        category: "Burgers",
+        badge: "SPICY",
+        price: 169,
+        desc: "Fried chicken thigh, fiery chili honey drizzle, toasted brioche.",
+        img: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=500&q=80",
+        inStock: true
+      },
+      {
+        id: "3",
+        name: "Rustic Farmhouse Pizza",
+        category: "Pizzas",
+        badge: "FRESH CRUST",
+        price: 249,
+        desc: "San Marzano sauce, fresh mozzarella, charred bell peppers.",
+        img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=500&q=80",
+        inStock: true
+      },
+      {
+        id: "4",
+        name: "Herbed Sea Salt Fries",
+        category: "Sides",
+        badge: "SIDES",
+        price: 89,
+        desc: "Hand-cut Idaho potatoes tossed with rosemary and flaky salt.",
+        img: "https://images.unsplash.com/photo-1576107232684-1279f3908594?w=500&q=80",
+        inStock: true
+      },
+      {
+        id: "5",
+        name: "Cold Brew Vanilla Shaker",
+        category: "Drinks",
+        badge: "CHILLED",
+        price: 79,
+        desc: "Slow steeped espresso shaken over sweet cream and whole milk.",
+        img: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=500&q=80",
+        inStock: true
+      }
+    ];
+
+    let store = JSON.parse(localStorage.getItem('qb_store')) || DEFAULT_STORE;
+    let menu = JSON.parse(localStorage.getItem('qb_menu')) || DEFAULT_MENU;
+    let cart = {};
+    let activeCategory = 'Everything';
+    let searchQuery = '';
+    let customerCoords = null; // STRICT: Set only when customer taps GPS
+    let calculatedDistance = 0;
+    let logoClicks = 0;
+    let countdownInterval = null;
+
+    function saveState() {
+      localStorage.setItem('qb_store', JSON.stringify(store));
+      localStorage.setItem('qb_menu', JSON.stringify(menu));
+      updateStoreStatusUI();
+    }
+
+    function init() {
+      renderCategories();
+      renderMenu();
+      updateStoreStatusUI();
+      updateCartSummary();
+      generateStoreQR();
+    }
+
+    function updateStoreStatusUI() {
+      const statusPill = document.getElementById('status-pill');
+      const statusText = document.getElementById('status-text');
+      const banner = document.getElementById('store-closed-banner');
+      const toggleBtn = document.getElementById('toggle-store-status-btn');
+      const heroRate = document.getElementById('hero-rate-display');
+
+      if (heroRate) heroRate.innerText = store.perKmRate;
+
+      if (store.isOpen) {
+        statusPill.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/70 border border-emerald-300 text-[11px] font-bold text-emerald-800";
+        statusText.innerText = "Open";
+        banner.classList.add('hidden');
+        if (toggleBtn) {
+          toggleBtn.innerText = "Store Open (Click to Close)";
+          toggleBtn.className = "px-4 py-2 rounded-xl text-xs font-bold text-white bg-brand-green hover:bg-brand-greenLight transition";
+        }
+      } else {
+        statusPill.className = "flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100/70 border border-red-300 text-[11px] font-bold text-red-800";
+        statusText.innerText = "Closed";
+        banner.classList.remove('hidden');
+        if (toggleBtn) {
+          toggleBtn.innerText = "Store Closed (Click to Open)";
+          toggleBtn.className = "px-4 py-2 rounded-xl text-xs font-bold text-white bg-red-600 hover:bg-red-700 transition";
+        }
+      }
+    }
+
+    function toggleStoreStatus() {
+      store.isOpen = !store.isOpen;
+      saveState();
+      renderMenu();
+    }
+
+    function renderCategories() {
+      const categories = ['Everything', ...new Set(menu.map(i => i.category))];
+      const container = document.getElementById('category-pills');
+      container.innerHTML = categories.map(cat => `
+        <button onclick="setCategory('${cat}')" class="px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition ${activeCategory === cat ? 'bg-brand-terracotta text-white shadow-sm' : 'bg-white border border-brand-border text-brand-dark hover:bg-stone-50'}">
+          ${cat}
+        </button>
+      `).join('');
+    }
+
+    function setCategory(cat) {
+      activeCategory = cat;
+      renderCategories();
+      renderMenu();
+    }
+
+    function handleSearch() {
+      searchQuery = document.getElementById('search-input').value.toLowerCase().trim();
+      renderMenu();
+    }
+
+    function renderMenu() {
+      const grid = document.getElementById('menu-grid');
+      let filtered = activeCategory === 'Everything' ? menu : menu.filter(m => m.category === activeCategory);
+
+      if (searchQuery) {
+        filtered = filtered.filter(m => m.name.toLowerCase().includes(searchQuery) || m.desc.toLowerCase().includes(searchQuery));
+      }
+
+      grid.innerHTML = filtered.map(item => {
+        const qty = cart[item.id] || 0;
+        const isOutOfStock = !item.inStock;
+        const isDisabled = !store.isOpen || isOutOfStock;
+
+        return `
+          <div class="bg-white rounded-3xl border border-brand-border overflow-hidden flex flex-col justify-between shadow-xs hover:shadow-md transition">
+            <div class="relative h-44 w-full bg-stone-100">
+              <img src="${item.img}" alt="${item.name}" class="w-full h-full object-cover ${isOutOfStock ? 'grayscale opacity-60' : ''}" />
+              <span class="absolute top-3 left-3 bg-white/95 backdrop-blur-md text-[9px] uppercase font-extrabold px-2.5 py-1 rounded-full text-brand-dark tracking-wider shadow-xs">
+                ${item.badge || item.category}
+              </span>
+              ${isOutOfStock ? `<span class="absolute bottom-3 right-3 bg-red-600 text-white text-[9px] font-black uppercase px-2 py-0.5 rounded-md">Sold Out</span>` : ''}
+            </div>
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h4 class="font-serif font-black text-base text-brand-dark leading-snug">${item.name}</h4>
+                <p class="text-xs text-brand-muted mt-1 leading-relaxed line-clamp-2">${item.desc}</p>
+              </div>
+              <div class="flex items-center justify-between pt-2 border-t border-brand-border/60">
+                <span class="font-serif font-black text-base text-brand-dark">₹${item.price}</span>
+                ${isDisabled ? `
+                  <span class="text-[11px] font-bold text-stone-400 bg-stone-100 px-3 py-1.5 rounded-xl">Unavailable</span>
+                ` : qty === 0 ? `
+                  <button onclick="modifyCart('${item.id}', 1)" class="bg-brand-cream hover:bg-stone-100 border border-brand-border text-brand-dark text-xs font-bold px-4 py-1.5 rounded-xl transition flex items-center gap-1.5">
+                    <span>Add</span> <i class="fa-solid fa-plus text-[10px] text-brand-muted"></i>
+                  </button>
+                ` : `
+                  <div class="flex items-center gap-2 bg-brand-cream border border-brand-border px-2 py-1 rounded-xl">
+                    <button onclick="modifyCart('${item.id}', -1)" class="w-6 h-6 rounded-lg bg-white font-black text-xs text-brand-dark shadow-xs flex items-center justify-center">-</button>
+                    <span class="font-extrabold text-xs px-1 text-brand-dark">${qty}</span>
+                    <button onclick="modifyCart('${item.id}', 1)" class="w-6 h-6 rounded-lg bg-white font-black text-xs text-brand-dark shadow-xs flex items-center justify-center">+</button>
+                  </div>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function modifyCart(id, delta) {
+      if (!store.isOpen) return;
+      cart[id] = (cart[id] || 0) + delta;
+      if (cart[id] <= 0) delete cart[id];
+      renderMenu();
+      updateCartSummary();
+    }
+
+    function updateCartSummary() {
+      const itemCount = Object.values(cart).reduce((a, b) => a + b, 0);
+      let subtotal = 0;
+      Object.keys(cart).forEach(id => {
+        const dish = menu.find(m => m.id === id);
+        if (dish) subtotal += dish.price * cart[id];
+      });
+
+      const deliveryFee = (itemCount > 0 && customerCoords) 
+        ? Math.round(store.baseFee + (calculatedDistance * store.perKmRate)) 
+        : 0;
+
+      const grandTotal = subtotal + deliveryFee;
+
+      document.getElementById('bottom-bar-count').innerText = itemCount;
+      document.getElementById('bottom-bar-total').innerText = grandTotal;
+      document.getElementById('bill-subtotal').innerText = subtotal;
+      document.getElementById('bill-distance').innerText = customerCoords ? calculatedDistance.toFixed(1) : "0.0";
+      document.getElementById('bill-delivery').innerText = customerCoords ? deliveryFee : "Tap GPS";
+      document.getElementById('bill-total').innerText = grandTotal;
+
+      const bottomBar = document.getElementById('sticky-bottom-bar');
+      if (itemCount > 0 && store.isOpen) {
+        bottomBar.classList.remove('translate-y-32');
+      } else {
+        bottomBar.classList.add('translate-y-32');
+      }
+
+      renderCartDrawerItems();
+    }
+
+    function renderCartDrawerItems() {
+      const container = document.getElementById('cart-items-list');
+      const itemIds = Object.keys(cart);
+
+      if (itemIds.length === 0) {
+        container.innerHTML = `<p class="text-xs text-brand-muted text-center py-8">Your bag is empty.</p>`;
+        return;
+      }
+
+      container.innerHTML = itemIds.map(id => {
+        const dish = menu.find(m => m.id === id);
+        if (!dish) return '';
+        const qty = cart[id];
+        return `
+          <div class="flex items-center justify-between bg-white p-2.5 rounded-2xl border border-brand-border">
+            <div>
+              <p class="font-bold text-brand-dark text-xs">${dish.name}</p>
+              <p class="text-[11px] text-brand-muted font-semibold">₹${dish.price} × ${qty} = ₹${dish.price * qty}</p>
+            </div>
+            <div class="flex items-center gap-1.5 bg-brand-cream px-2 py-1 rounded-xl">
+              <button onclick="modifyCart('${id}', -1)" class="w-5 h-5 bg-white rounded font-bold text-xs">-</button>
+              <span class="text-xs font-bold px-1">${qty}</span>
+              <button onclick="modifyCart('${id}', 1)" class="w-5 h-5 bg-white rounded font-bold text-xs">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleCartDrawer(open) {
+      const overlay = document.getElementById('cart-drawer-overlay');
+      const drawer = document.getElementById('cart-drawer');
+      if (open) {
+        overlay.classList.remove('pointer-events-none', 'opacity-0');
+        drawer.classList.remove('translate-x-full');
+      } else {
+        overlay.classList.add('pointer-events-none', 'opacity-0');
+        drawer.classList.add('translate-x-full');
+      }
+    }
+
+    // --- MANDATORY GPS DETECTION ---
+    function detectCustomerLocation() {
+      const statusBox = document.getElementById('gps-status-box');
+      const statusText = document.getElementById('gps-status-text');
+
+      statusText.innerText = "Requesting device GPS coordinates...";
+      statusBox.className = "mt-2 p-2.5 rounded-xl bg-amber-100/70 border border-amber-300 text-[11px] font-bold text-amber-900 flex items-center gap-2";
+
+      if (!navigator.geolocation) {
+        alert("Geolocation not supported by your browser. Please open in Chrome or Safari.");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          customerCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          calculatedDistance = computeHaversineKm(store.lat, store.lng, customerCoords.lat, customerCoords.lng);
+          if (calculatedDistance < 1) calculatedDistance = 1.0;
+
+          statusBox.className = "mt-2 p-2.5 rounded-xl bg-emerald-100/70 border border-emerald-300 text-[11px] font-bold text-emerald-900 flex items-center gap-2";
+          statusBox.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> <span>Live GPS Verified: ${calculatedDistance.toFixed(1)} km from kitchen</span>`;
+
+          updateCartSummary();
+        },
+        err => {
+          statusBox.className = "mt-2 p-2.5 rounded-xl bg-red-100/70 border border-red-300 text-[11px] font-bold text-red-900 flex items-center gap-2";
+          statusBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-red-600"></i> <span>GPS permission denied. Please allow location access to calculate delivery fee.</span>`;
+          customerCoords = null;
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    }
+
+    function computeHaversineKm(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    // --- ZERO-BACKEND WHATSAPP ORDER DISPATCH ---
+    function submitOrderViaWhatsApp() {
+      if (!store.isOpen) {
+        alert("The kitchen is currently closed.");
+        return;
+      }
+
+      const name = document.getElementById('cust-name').value.trim();
+      const phone = document.getElementById('cust-phone').value.trim();
+      const address = document.getElementById('cust-address').value.trim();
+
+      if (!name) { alert("Please enter your name."); return; }
+      if (!phone || phone.length < 10) { alert("Please provide a valid 10-digit phone number."); return; }
+      if (!address) { alert("Please provide your delivery address."); return; }
+
+      // MANDATORY GPS CHECK
+      if (!customerCoords) {
+        alert("📍 Live GPS Location is Mandatory!\nPlease tap 'Tap GPS' so our rider gets your exact pinned map location.");
+        detectCustomerLocation();
+        return;
+      }
+
+      const orderId = Math.floor(1000 + Math.random() * 9000);
+      let itemsListText = "";
+      let subtotal = 0;
+
+      Object.keys(cart).forEach(id => {
+        const dish = menu.find(m => m.id === id);
+        if (dish) {
+          itemsListText += `• ${cart[id]}x ${dish.name} - ₹${dish.price * cart[id]}\n`;
+          subtotal += dish.price * cart[id];
+        }
+      });
+
+      const deliveryFee = Math.round(store.baseFee + (calculatedDistance * store.perKmRate));
+      const grandTotal = subtotal + deliveryFee;
+      const mapLink = `https://maps.google.com/?q=${customerCoords.lat},${customerCoords.lng}`;
+
+      const receipt = `🍔 *NEW QUICKBITE ORDER #${orderId}*\n` +
+        `--------------------------------\n` +
+        `*Customer:* ${name}\n` +
+        `*Mobile:* ${phone}\n` +
+        `*Address:* ${address}\n` +
+        `*Live Map Pin:* ${mapLink}\n` +
+        `--------------------------------\n` +
+        `*Ordered Items:*\n${itemsListText}` +
+        `--------------------------------\n` +
+        `*Food Subtotal:* ₹${subtotal}\n` +
+        `*Distance:* ${calculatedDistance.toFixed(1)} km (Rate: ₹${store.perKmRate}/km)\n` +
+        `*Delivery Charge:* ₹${deliveryFee}\n` +
+        `💰 *TOTAL PAYABLE (COD):* ₹${grandTotal}\n` +
+        `*Payment Mode:* Cash on Delivery (COD)\n` +
+        `--------------------------------\n` +
+        `_Please reply to confirm and start kitchen prep._`;
+
+      store.stats.orders += 1;
+      store.stats.revenue += grandTotal;
+      saveState();
+
+      cart = {};
+      renderMenu();
+      updateCartSummary();
+      toggleCartDrawer(false);
+
+      const waUrl = `https://wa.me/${store.phone}?text=${encodeURIComponent(receipt)}`;
+      window.open(waUrl, '_blank');
+
+      startOrderTracker(orderId, calculatedDistance);
+    }
+
+    // --- TRACKER & REVIEWS ---
+    function startOrderTracker(orderId, distanceKm) {
+      document.getElementById('tracker-order-id').innerText = orderId;
+      document.getElementById('tracker-call-support').href = `tel:${store.phone}`;
+      const modal = document.getElementById('tracker-modal');
+      modal.classList.remove('hidden');
+
+      let totalSeconds = Math.round((15 + (distanceKm * 3)) * 60);
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      countdownInterval = setInterval(() => {
+        totalSeconds--;
+        if (totalSeconds <= 0) {
+          clearInterval(countdownInterval);
+          document.getElementById('tracker-countdown').innerText = "00:00";
+          document.getElementById('tracker-step-title').innerText = "Rider Has Arrived!";
+          updateTrackingMilestone(4);
+          return;
+        }
+
+        const mins = Math.floor(totalSeconds / 60);
+        const secs = totalSeconds % 60;
+        document.getElementById('tracker-countdown').innerText = 
+          `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (totalSeconds > 1000) {
+          document.getElementById('tracker-step-title').innerText = "Order Sent to Kitchen";
+          updateTrackingMilestone(1);
+        } else if (totalSeconds > 500) {
+          document.getElementById('tracker-step-title').innerText = "Packaging Fresh Meal";
+          updateTrackingMilestone(2);
+        } else {
+          document.getElementById('tracker-step-title').innerText = "Rider On The Way";
+          updateTrackingMilestone(3);
+        }
+      }, 1000);
+    }
+
+    function updateTrackingMilestone(step) {
+      for (let i = 1; i <= 4; i++) {
+        const el = document.getElementById(`step-${i}`);
+        if (i <= step) {
+          el.className = "py-2 rounded-lg bg-emerald-600 text-white font-bold";
+        } else {
+          el.className = "py-2 rounded-lg bg-stone-100 text-stone-400 font-bold";
+        }
+      }
+    }
+
+    function closeTrackerModal() {
+      document.getElementById('tracker-modal').classList.add('hidden');
+    }
+
+    let selectedRating = 5;
+    function setRating(val) {
+      selectedRating = val;
+      const stars = document.getElementById('star-rating').children;
+      for (let i = 0; i < 5; i++) {
+        stars[i].className = i < val ? "fa-solid fa-star cursor-pointer text-brand-sun" : "fa-regular fa-star cursor-pointer text-stone-300";
+      }
+    }
+
+    function submitReview() {
+      const reviewText = document.getElementById('review-text').value.trim();
+      store.stats.ratingTotal += selectedRating;
+      store.stats.ratingCount += 1;
+      saveState();
+
+      alert("Thank you for your rating!");
+      if (reviewText) {
+        const feedbackMsg = `⭐ *Customer Review (#${document.getElementById('tracker-order-id').innerText}):* ${selectedRating}/5 Stars\n"${reviewText}"`;
+        window.open(`https://wa.me/${store.phone}?text=${encodeURIComponent(feedbackMsg)}`, '_blank');
+      }
+      closeTrackerModal();
+    }
+
+    // --- ADMIN DASHBOARD ---
+    function handleLogoClick() {
+      logoClicks++;
+      if (logoClicks >= 5) {
+        logoClicks = 0;
+        openAdminPrompt();
+      }
+    }
+
+    function openAdminPrompt() {
+      document.getElementById('admin-pin-modal').classList.remove('hidden');
+      document.getElementById('admin-pin-input').value = '';
+    }
+
+    function closeAdminPinModal() {
+      document.getElementById('admin-pin-modal').classList.add('hidden');
+    }
+
+    function verifyAdminPin() {
+      const pin = document.getElementById('admin-pin-input').value;
+      if (pin === store.pin) {
+        closeAdminPinModal();
+        openAdminDashboard();
+      } else {
+        alert("Incorrect PIN code.");
+      }
+    }
+
+    function openAdminDashboard() {
+      document.getElementById('admin-modal').classList.remove('hidden');
+      renderAdminStats();
+      renderAdminMenuList();
+      loadAdminSettingsInputs();
+      generateStoreQR();
+    }
+
+    function closeAdminModal() {
+      document.getElementById('admin-modal').classList.add('hidden');
+    }
+
+    function renderAdminStats() {
+      document.getElementById('stat-revenue').innerText = store.stats.revenue;
+      document.getElementById('stat-orders').innerText = store.stats.orders;
+      document.getElementById('stat-top-item').innerText = store.stats.topItem;
+      const avg = (store.stats.ratingTotal / store.stats.ratingCount).toFixed(1);
+      document.getElementById('stat-rating').innerText = `${avg} ★`;
+    }
+
+    function switchAdminTab(tab) {
+      document.getElementById('admin-tab-menu').classList.toggle('hidden', tab !== 'menu');
+      document.getElementById('admin-tab-delivery').classList.toggle('hidden', tab !== 'delivery');
+      document.getElementById('admin-tab-qr').classList.toggle('hidden', tab !== 'qr');
+
+      document.getElementById('tab-btn-menu').className = tab === 'menu' ? "pb-2 border-b-2 border-brand-terracotta text-brand-terracotta font-bold" : "pb-2 font-bold text-brand-muted";
+      document.getElementById('tab-btn-delivery').className = tab === 'delivery' ? "pb-2 border-b-2 border-brand-terracotta text-brand-terracotta font-bold" : "pb-2 font-bold text-brand-muted";
+      document.getElementById('tab-btn-qr').className = tab === 'qr' ? "pb-2 border-b-2 border-brand-terracotta text-brand-terracotta font-bold" : "pb-2 font-bold text-brand-muted";
+    }
+
+    function renderAdminMenuList() {
+      const container = document.getElementById('admin-menu-list');
+      document.getElementById('admin-item-count').innerText = menu.length;
+
+      container.innerHTML = menu.map(dish => `
+        <div class="flex items-center justify-between p-2.5 bg-white border border-brand-border rounded-2xl text-xs">
+          <div class="flex items-center gap-2.5">
+            <img src="${dish.img}" class="w-10 h-10 rounded-xl object-cover" />
+            <div>
+              <p class="font-bold text-brand-dark">${dish.name}</p>
+              <p class="text-brand-muted font-medium">₹${dish.price} · <span class="${dish.inStock ? 'text-emerald-700' : 'text-red-600'} font-bold">${dish.inStock ? 'In Stock' : 'Sold Out'}</span></p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1.5 font-bold">
+            <button onclick="toggleDishStock('${dish.id}')" class="px-2.5 py-1 rounded-xl border border-brand-border text-[11px] bg-brand-cream hover:bg-stone-100">
+              ${dish.inStock ? 'Make Out' : 'Make In'}
+            </button>
+            <button onclick="editDishItem('${dish.id}')" class="p-1 text-brand-muted hover:text-brand-dark"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button onclick="deleteDishItem('${dish.id}')" class="p-1 text-red-500 hover:text-red-700"><i class="fa-solid fa-trash"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleDishStock(id) {
+      const dish = menu.find(m => m.id === id);
+      if (dish) {
+        dish.inStock = !dish.inStock;
+        saveState();
+        renderAdminMenuList();
+        renderMenu();
+      }
+    }
+
+    function openDishEditor(id = null) {
+      document.getElementById('dish-modal').classList.remove('hidden');
+      if (id) {
+        const dish = menu.find(m => m.id === id);
+        document.getElementById('dish-modal-title').innerText = "Edit Dish";
+        document.getElementById('dish-edit-id').value = dish.id;
+        document.getElementById('dish-name').value = dish.name;
+        document.getElementById('dish-price').value = dish.price;
+        document.getElementById('dish-category').value = dish.category;
+        document.getElementById('dish-desc').value = dish.desc;
+        document.getElementById('dish-img').value = dish.img;
+        document.getElementById('dish-stock').checked = dish.inStock;
+      } else {
+        document.getElementById('dish-modal-title').innerText = "Add New Dish";
+        document.getElementById('dish-edit-id').value = '';
+        document.getElementById('dish-name').value = '';
+        document.getElementById('dish-price').value = '';
+        document.getElementById('dish-category').value = 'Burgers';
+        document.getElementById('dish-desc').value = '';
+        document.getElementById('dish-img').value = '';
+        document.getElementById('dish-stock').checked = true;
+      }
+    }
+
+    function closeDishModal() {
+      document.getElementById('dish-modal').classList.add('hidden');
+    }
+
+    function saveDishItem() {
+      const id = document.getElementById('dish-edit-id').value;
+      const name = document.getElementById('dish-name').value.trim();
+      const price = parseFloat(document.getElementById('dish-price').value);
+      const category = document.getElementById('dish-category').value;
+      const desc = document.getElementById('dish-desc').value.trim();
+      const img = document.getElementById('dish-img').value.trim() || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=500';
+      const inStock = document.getElementById('dish-stock').checked;
+
+      if (!name || isNaN(price)) {
+        alert("Please enter a valid dish name and price.");
+        return;
+      }
+
+      if (id) {
+        const dish = menu.find(m => m.id === id);
+        if (dish) Object.assign(dish, { name, price, category, desc, img, inStock });
+      } else {
+        menu.push({ id: Date.now().toString(), name, price, category, desc, img, inStock, badge: category.toUpperCase() });
+      }
+
+      saveState();
+      closeDishModal();
+      renderAdminMenuList();
+      renderCategories();
+      renderMenu();
+    }
+
+    function deleteDishItem(id) {
+      if (confirm("Delete this food item?")) {
+        menu = menu.filter(m => m.id !== id);
+        saveState();
+        renderAdminMenuList();
+        renderCategories();
+        renderMenu();
+      }
+    }
+
+    function editDishItem(id) {
+      openDishEditor(id);
+    }
+
+    function loadAdminSettingsInputs() {
+      document.getElementById('setting-per-km').value = store.perKmRate;
+      document.getElementById('setting-base-fee').value = store.baseFee;
+      document.getElementById('setting-lat').value = store.lat;
+      document.getElementById('setting-lng').value = store.lng;
+      document.getElementById('setting-phone').value = store.phone;
+    }
+
+    function saveStoreSettings() {
+      store.perKmRate = parseFloat(document.getElementById('setting-per-km').value) || 10;
+      store.baseFee = parseFloat(document.getElementById('setting-base-fee').value) || 20;
+      store.lat = parseFloat(document.getElementById('setting-lat').value) || 17.5540;
+      store.lng = parseFloat(document.getElementById('setting-lng').value) || 80.6178;
+      store.phone = document.getElementById('setting-phone').value.trim();
+
+      saveState();
+      updateCartSummary();
+      alert("Settings saved successfully!");
+    }
+
+    function generateStoreQR() {
+      const container = document.getElementById('qrcode-canvas');
+      container.innerHTML = "";
+      const currentUrl = window.location.href.split('#')[0];
+      new QRCode(container, {
+        text: currentUrl,
+        width: 140,
+        height: 140,
+        colorDark: "#1D1D1B",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    }
+
+    window.onload = init;
+  </script>
+</body>
+</html>
+
